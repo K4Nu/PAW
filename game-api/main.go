@@ -2,6 +2,7 @@ package main
 
 import (
 	"PawTribalWars/db"
+	"PawTribalWars/handlers"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -17,6 +18,9 @@ func main() {
 
 	// Router
 	r := mux.NewRouter()
+	r.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
+	r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
+	r.HandleFunc("/logout", handlers.LogoutHandler).Methods("POST")
 	fmt.Println("🚀 Server running on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
