@@ -1,0 +1,13 @@
+# Binaries
+/bin/
+/build/
+*.exe
+*.out
+
+# Go modules
+/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.iml
