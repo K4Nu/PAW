@@ -54,6 +54,19 @@ func isEmailValid(email string) bool {
 
 // ===== Handlery =====
 
+// RegisterHandler godoc
+// @Summary Rejestracja użytkownika
+// @Description Tworzy nowego użytkownika wraz ze startową wioską, zasobami, budynkami i jednostkami
+// @Tags auth
+// @Accept x-www-form-urlencoded
+// @Produce json
+// @Param username formData string true "Nazwa użytkownika"
+// @Param email formData string true "Adres e-mail"
+// @Param password formData string true "Hasło (min 8 znaków, wielka, mała, cyfra, znak specjalny)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string "Invalid input"
+// @Failure 409 {string} string "User exists or DB error"
+// @Router /register [post]
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	email := r.FormValue("email")
@@ -133,6 +146,18 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// LoginHandler godoc
+// @Summary Logowanie użytkownika
+// @Description Zwraca token JWT po poprawnym zalogowaniu
+// @Tags auth
+// @Accept x-www-form-urlencoded
+// @Produce json
+// @Param username formData string true "Nazwa użytkownika"
+// @Param password formData string true "Hasło"
+// @Success 200 {object} map[string]string
+// @Failure 401 {string} string "Invalid credentials"
+// @Failure 500 {string} string "DB error"
+// @Router /login [post]
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
@@ -171,6 +196,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
 
+// LogoutHandler godoc
+// @Summary Wylogowanie użytkownika
+// @Description Nie unieważnia tokena – klient powinien go odrzucić po stronie frontendu
+// @Tags auth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /logout [post]
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "User logged out. Discard token client-side."})
 }

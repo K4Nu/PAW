@@ -36,7 +36,16 @@ func calculateUpgradeCost(buildingType string, nextLevel int) BuildingCost {
 	}
 }
 
-// GET /buildings?village_id=1
+// GetBuildingsHandler godoc
+// @Summary Pobierz budynki wioski
+// @Description Zwraca listę budynków i ich poziomów w wybranej wiosce
+// @Tags buildings
+// @Produce json
+// @Param village_id query int true "ID wioski"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing or invalid village_id"
+// @Failure 500 {string} string "DB error"
+// @Router /buildings [get]
 func GetBuildingsHandler(w http.ResponseWriter, r *http.Request) {
 	villageIDStr := r.URL.Query().Get("village_id")
 	if villageIDStr == "" {
@@ -73,7 +82,19 @@ func GetBuildingsHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// PUT /buildings/upgrade?village_id=1&type=lumbermill
+// UpgradeBuildingHandler godoc
+// @Summary Ulepsz budynek
+// @Description Podnosi poziom budynku, jeśli gracza stać na koszt
+// @Tags buildings
+// @Produce json
+// @Param village_id query int true "ID wioski"
+// @Param type query string true "Typ budynku (np. lumbermill, claypit, ironmine, warehouse, barracks)"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing params or invalid village_id"
+// @Failure 403 {string} string "Not enough resources"
+// @Failure 404 {string} string "Building not found"
+// @Failure 500 {string} string "DB error"
+// @Router /buildings/upgrade [put]
 func UpgradeBuildingHandler(w http.ResponseWriter, r *http.Request) {
 	villageIDStr := r.URL.Query().Get("village_id")
 	buildingType := r.URL.Query().Get("type")
@@ -143,7 +164,18 @@ func UpgradeBuildingHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GET /buildings/cost?village_id=1&type=lumbermill
+// GetBuildingCostHandler godoc
+// @Summary Pobierz koszt ulepszenia budynku
+// @Description Zwraca koszt następnego poziomu dla podanego budynku
+// @Tags buildings
+// @Produce json
+// @Param village_id query int true "ID wioski"
+// @Param type query string true "Typ budynku (np. lumbermill, claypit, ironmine, warehouse, barracks)"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing params or invalid village_id"
+// @Failure 404 {string} string "Building not found"
+// @Failure 500 {string} string "DB error"
+// @Router /buildings/cost [get]
 func GetBuildingCostHandler(w http.ResponseWriter, r *http.Request) {
 	villageIDStr := r.URL.Query().Get("village_id")
 	buildingType := r.URL.Query().Get("type")

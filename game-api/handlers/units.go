@@ -6,13 +6,18 @@ import (
 	"strconv"
 
 	"PawTribalWars/db"
-// Units
-r.Handle("/units", handlers.AuthMiddleware(http.HandlerFunc(handlers.GetUnitsHandler))).Methods("GET")
-r.Handle("/units/recruit", handlers.AuthMiddleware(http.HandlerFunc(handlers.RecruitUnitsHandler))).Methods("POST"))
+)
 
-// =============================
-// GET /units?village_id=1
-// =============================
+// GetUnitsHandler godoc
+// @Summary Pobierz jednostki w wiosce
+// @Description Zwraca listę jednostek i ich liczebność w wybranej wiosce
+// @Tags units
+// @Produce json
+// @Param village_id query int true "ID wioski"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing or invalid village_id"
+// @Failure 500 {string} string "DB error"
+// @Router /units [get]
 func GetUnitsHandler(w http.ResponseWriter, r *http.Request) {
 	villageIDStr := r.URL.Query().Get("village_id")
 	if villageIDStr == "" {
@@ -52,9 +57,19 @@ func GetUnitsHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// =============================
-// POST /units/recruit?village_id=1&type=spearman&count=5
-// =============================
+// RecruitUnitsHandler godoc
+// @Summary Rekrutuj jednostki
+// @Description Rekrutuje jednostki w wiosce, o ile użytkownik posiada wystarczające zasoby.
+// @Tags units
+// @Produce json
+// @Param village_id query int true "ID wioski"
+// @Param type query string true "Typ jednostki (spearman, swordsman, archer)"
+// @Param count query int true "Liczba rekrutowanych jednostek"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing params or invalid unit type"
+// @Failure 403 {string} string "Not enough resources or village not yours"
+// @Failure 500 {string} string "DB error"
+// @Router /units/recruit [post]
 func RecruitUnitsHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 
@@ -69,7 +84,7 @@ func RecruitUnitsHandler(w http.ResponseWriter, r *http.Request) {
 	villageID, _ := strconv.Atoi(villageIDStr)
 	count, _ := strconv.Atoi(countStr)
 
-	// 🔹 sprawdź, czy wioska należy do usera
+	// sprawdź, czy wioska należy do usera
 	var belongs bool
 	err := db.DB.QueryRow(`
 		SELECT EXISTS(
@@ -82,7 +97,7 @@ func RecruitUnitsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 🔹 koszty jednostek
+	// koszty jednostek
 	costs := map[string][3]int{
 		"spearman":  {50, 30, 20},
 		"swordsman": {30, 50, 40},
@@ -97,7 +112,7 @@ func RecruitUnitsHandler(w http.ResponseWriter, r *http.Request) {
 	totalClay := cost[1] * count
 	totalIron := cost[2] * count
 
-	// 🔹 sprawdź zasoby
+	// sprawdź zasoby
 	var wood, clay, iron int
 	err = db.DB.QueryRow("SELECT wood, clay, iron FROM resources WHERE village_id=$1", villageID).
 		Scan(&wood, &clay, &iron)
@@ -110,7 +125,7 @@ func RecruitUnitsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 🔹 odejmij zasoby
+	// odejmij zasoby
 	_, err = db.DB.Exec(`
 		UPDATE resources
 		SET wood = wood - $1, clay = clay - $2, iron = iron - $3, updated_at=NOW()
@@ -121,7 +136,7 @@ func RecruitUnitsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 🔹 dodaj jednostki
+	// dodaj jednostki
 	_, err = db.DB.Exec(`
 		UPDATE units SET count = count + $1
 		WHERE village_id=$2 AND type=$3

@@ -2,16 +2,20 @@ package main
 
 import (
 	"PawTribalWars/db"
+	_ "PawTribalWars/docs"
 	"PawTribalWars/handlers"
 	"fmt"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
-
+// @title Game API
+// @version 1.0
+// @description Strategy game backend with users, villages, resources, buildings, and units.
+// @host localhost:8080
+// @BasePath /
 func main() {
 	// Połącz się z bazą
 	db.ConnectDB()
@@ -40,7 +44,10 @@ func main() {
 	// Units
 	r.Handle("/units", handlers.AuthMiddleware(http.HandlerFunc(handlers.GetUnitsHandler))).Methods("GET")
 	r.Handle("/units/recruit", handlers.AuthMiddleware(http.HandlerFunc(handlers.RecruitUnitsHandler))).Methods("POST")
-	
+
+	// Swagger UI
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
 	fmt.Println("🚀 Server running on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

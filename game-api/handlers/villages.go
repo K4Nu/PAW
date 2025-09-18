@@ -16,9 +16,15 @@ type Village struct {
 	CreatedAt string `json:"created_at"`
 }
 
-// =============================
-// GET /villages
-// =============================
+// GetVillagesHandler godoc
+// @Summary Pobierz wszystkie wioski użytkownika
+// @Description Zwraca listę wiosek należących do zalogowanego użytkownika
+// @Tags villages
+// @Produce json
+// @Success 200 {array} Village
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 500 {string} string "DB error"
+// @Router /villages [get]
 func GetVillagesHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 
@@ -44,9 +50,17 @@ func GetVillagesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(villages)
 }
 
-// =============================
-// POST /villages
-// =============================
+// CreateVillageHandler godoc
+// @Summary Utwórz nową wioskę
+// @Description Tworzy nową wioskę, jeśli użytkownik spełnia wymagania Townhallu
+// @Tags villages
+// @Produce json
+// @Param name formData string true "Nazwa nowej wioski"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing village name"
+// @Failure 403 {string} string "You need higher Townhall level"
+// @Failure 500 {string} string "DB error"
+// @Router /villages [post]
 func CreateVillageHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 	name := r.FormValue("name")
@@ -127,9 +141,18 @@ func CreateVillageHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// =============================
-// PUT /villages/{id}
-// =============================
+// UpdateVillageHandler godoc
+// @Summary Zmień nazwę wioski
+// @Description Aktualizuje nazwę wioski, jeśli należy do użytkownika
+// @Tags villages
+// @Produce json
+// @Param id path int true "Village ID"
+// @Param name formData string true "Nowa nazwa wioski"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string "Invalid village ID or missing name"
+// @Failure 403 {string} string "Village not yours"
+// @Failure 500 {string} string "DB error"
+// @Router /villages/{id} [put]
 func UpdateVillageHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 	idStr := mux.Vars(r)["id"]
@@ -165,9 +188,17 @@ func UpdateVillageHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Village updated"})
 }
 
-// =============================
-// DELETE /villages/{id}
-// =============================
+// DeleteVillageHandler godoc
+// @Summary Usuń wioskę
+// @Description Usuwa wioskę użytkownika, wraz z powiązanymi danymi
+// @Tags villages
+// @Produce json
+// @Param id path int true "Village ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string "Invalid village ID"
+// @Failure 403 {string} string "Village not yours"
+// @Failure 500 {string} string "DB error"
+// @Router /villages/{id} [delete]
 func DeleteVillageHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 	idStr := mux.Vars(r)["id"]

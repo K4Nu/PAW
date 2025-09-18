@@ -9,7 +9,16 @@ import (
 	"PawTribalWars/db"
 )
 
-// GET /resources?village_id=1
+// GetResourcesHandler godoc
+// @Summary Pobierz zasoby wioski
+// @Description Zwraca aktualny stan zasobów w wiosce. Produkcja zasobów jest liczona dynamicznie na podstawie poziomu budynków (lumbermill, claypit, ironmine) i czasu, jaki minął od ostatniej aktualizacji.
+// @Tags resources
+// @Produce json
+// @Param village_id query int true "ID wioski"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string "Missing or invalid village_id"
+// @Failure 404 {string} string "Resources not found"
+// @Router /resources [get]
 func GetResourcesHandler(w http.ResponseWriter, r *http.Request) {
 	villageIDStr := r.URL.Query().Get("village_id")
 	if villageIDStr == "" {

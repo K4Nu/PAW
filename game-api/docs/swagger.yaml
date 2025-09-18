@@ -1,0 +1,445 @@
+basePath: /
+definitions:
+  handlers.Village:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Strategy game backend with users, villages, resources, buildings, and
+    units.
+  title: Game API
+  version: "1.0"
+paths:
+  /buildings:
+    get:
+      description: Zwraca listę budynków i ich poziomów w wybranej wiosce
+      parameters:
+      - description: ID wioski
+        in: query
+        name: village_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid village_id
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Pobierz budynki wioski
+      tags:
+      - buildings
+  /buildings/cost:
+    get:
+      description: Zwraca koszt następnego poziomu dla podanego budynku
+      parameters:
+      - description: ID wioski
+        in: query
+        name: village_id
+        required: true
+        type: integer
+      - description: Typ budynku (np. lumbermill, claypit, ironmine, warehouse, barracks)
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing params or invalid village_id
+          schema:
+            type: string
+        "404":
+          description: Building not found
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Pobierz koszt ulepszenia budynku
+      tags:
+      - buildings
+  /buildings/upgrade:
+    put:
+      description: Podnosi poziom budynku, jeśli gracza stać na koszt
+      parameters:
+      - description: ID wioski
+        in: query
+        name: village_id
+        required: true
+        type: integer
+      - description: Typ budynku (np. lumbermill, claypit, ironmine, warehouse, barracks)
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing params or invalid village_id
+          schema:
+            type: string
+        "403":
+          description: Not enough resources
+          schema:
+            type: string
+        "404":
+          description: Building not found
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Ulepsz budynek
+      tags:
+      - buildings
+  /login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Zwraca token JWT po poprawnym zalogowaniu
+      parameters:
+      - description: Nazwa użytkownika
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Hasło
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Logowanie użytkownika
+      tags:
+      - auth
+  /logout:
+    post:
+      description: Nie unieważnia tokena – klient powinien go odrzucić po stronie
+        frontendu
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Wylogowanie użytkownika
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Tworzy nowego użytkownika wraz ze startową wioską, zasobami, budynkami
+        i jednostkami
+      parameters:
+      - description: Nazwa użytkownika
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Adres e-mail
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Hasło (min 8 znaków, wielka, mała, cyfra, znak specjalny)
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "409":
+          description: User exists or DB error
+          schema:
+            type: string
+      summary: Rejestracja użytkownika
+      tags:
+      - auth
+  /resources:
+    get:
+      description: Zwraca aktualny stan zasobów w wiosce. Produkcja zasobów jest liczona
+        dynamicznie na podstawie poziomu budynków (lumbermill, claypit, ironmine)
+        i czasu, jaki minął od ostatniej aktualizacji.
+      parameters:
+      - description: ID wioski
+        in: query
+        name: village_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid village_id
+          schema:
+            type: string
+        "404":
+          description: Resources not found
+          schema:
+            type: string
+      summary: Pobierz zasoby wioski
+      tags:
+      - resources
+  /units:
+    get:
+      description: Zwraca listę jednostek i ich liczebność w wybranej wiosce
+      parameters:
+      - description: ID wioski
+        in: query
+        name: village_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing or invalid village_id
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Pobierz jednostki w wiosce
+      tags:
+      - units
+  /units/recruit:
+    post:
+      description: Rekrutuje jednostki w wiosce, o ile użytkownik posiada wystarczające
+        zasoby.
+      parameters:
+      - description: ID wioski
+        in: query
+        name: village_id
+        required: true
+        type: integer
+      - description: Typ jednostki (spearman, swordsman, archer)
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: Liczba rekrutowanych jednostek
+        in: query
+        name: count
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing params or invalid unit type
+          schema:
+            type: string
+        "403":
+          description: Not enough resources or village not yours
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Rekrutuj jednostki
+      tags:
+      - units
+  /villages:
+    get:
+      description: Zwraca listę wiosek należących do zalogowanego użytkownika
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.Village'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Pobierz wszystkie wioski użytkownika
+      tags:
+      - villages
+    post:
+      description: Tworzy nową wioskę, jeśli użytkownik spełnia wymagania Townhallu
+      parameters:
+      - description: Nazwa nowej wioski
+        in: formData
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Missing village name
+          schema:
+            type: string
+        "403":
+          description: You need higher Townhall level
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Utwórz nową wioskę
+      tags:
+      - villages
+  /villages/{id}:
+    delete:
+      description: Usuwa wioskę użytkownika, wraz z powiązanymi danymi
+      parameters:
+      - description: Village ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid village ID
+          schema:
+            type: string
+        "403":
+          description: Village not yours
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Usuń wioskę
+      tags:
+      - villages
+    put:
+      description: Aktualizuje nazwę wioski, jeśli należy do użytkownika
+      parameters:
+      - description: Village ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nowa nazwa wioski
+        in: formData
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid village ID or missing name
+          schema:
+            type: string
+        "403":
+          description: Village not yours
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Zmień nazwę wioski
+      tags:
+      - villages
+swagger: "2.0"
