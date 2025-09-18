@@ -36,6 +36,10 @@ func main() {
 	r.Handle("/buildings", handlers.AuthMiddleware(http.HandlerFunc(handlers.GetBuildingsHandler))).Methods("GET")
 	r.Handle("/buildings/upgrade", handlers.AuthMiddleware(http.HandlerFunc(handlers.UpgradeBuildingHandler))).Methods("PUT")
 	r.Handle("/buildings/cost", handlers.AuthMiddleware(http.HandlerFunc(handlers.GetBuildingCostHandler))).Methods("GET")
+
+	// Units
+	r.Handle("/units", handlers.AuthMiddleware(http.HandlerFunc(handlers.GetUnitsHandler))).Methods("GET")
+	r.Handle("/units/recruit", handlers.AuthMiddleware(http.HandlerFunc(handlers.RecruitUnitsHandler))).Methods("POST")
 	
 	fmt.Println("🚀 Server running on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
